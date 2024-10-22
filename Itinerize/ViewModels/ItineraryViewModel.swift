@@ -19,9 +19,9 @@ class ItineraryViewModel: NSObject, ObservableObject, CLLocationManagerDelegate 
     private var cancellables = Set<AnyCancellable>()
     
     // Example API Keys (replace with your actual keys)
-    private let bookingAPIKey = "166325cfa9mshb0300d416004951p11da8fjsnb5d771eaab3b"
+    private let bookingAPIKey = "YOUR_API_KEY"
     private let apiHost = "booking-com15.p.rapidapi.com"
-    private let googlePlacesAPIKey = "AIzaSyD0hr6htOUZr9kUY3PZyfskrGJ0GBNNMJE"
+    private let googlePlacesAPIKey = "YOUR_API_KEY"
     
     private var locationManager = CLLocationManager()
     private var userLocation: CLLocation?
