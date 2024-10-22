@@ -18,14 +18,16 @@ struct ItineraryView: View {
     let preferences: [String]
     let selectedBudget: String
     
+    @State var chosenItinerary: ChosenItinerary = .activity
+    
     var body: some View {
         VStack {
             ZStack {
-                HStack {
+                HStack (alignment: .center) {
                     Text("Itinerary for \(destination)")
                         .font(.title3.bold().smallCaps())
                 }
-                HStack {
+                HStack (alignment: .center) {
                     Text("Cancel")
                         .font(.footnote.bold().smallCaps())
                         .padding(.leading)
@@ -43,63 +45,80 @@ struct ItineraryView: View {
                 }
                 Spacer()
             } else {
+                HStack {
+                    Text("Activities")
+                        .font(.footnote.bold().smallCaps())
+                        .foregroundStyle(chosenItinerary == .activity ? .black : .white)
+                        .frame(width: UIScreen.main.bounds.width / 5.5)
+                        .padding(.vertical, 8)
+                        .padding(.horizontal, 16)
+                        .background(chosenItinerary == .activity ? .white : .black)
+                        .cornerRadius(20)
+                        .onTapGesture {
+                            chosenItinerary = .activity
+                        }
+                    Spacer()
+                    Text("Flights")
+                        .font(.footnote.bold().smallCaps())
+                        .foregroundStyle(chosenItinerary == .flight ? .black : .white)
+                        .frame(width: UIScreen.main.bounds.width / 5.5)
+                        .padding(.vertical, 8)
+                        .padding(.horizontal, 16)
+                        .background(chosenItinerary == .flight ? .white : .black)
+                        .cornerRadius(20)
+                        .onTapGesture {
+                            chosenItinerary = .flight
+                        }
+                    Spacer()
+                    Text("Stays")
+                        .font(.footnote.bold().smallCaps())
+                        .foregroundStyle(chosenItinerary == .hotel ? .black : .white)
+                        .frame(width: UIScreen.main.bounds.width / 5.5)
+                        .padding(.vertical, 8)
+                        .padding(.horizontal, 16)
+                        .background(chosenItinerary == .hotel ? .white : .black)
+                        .cornerRadius(20)
+                        .onTapGesture {
+                            chosenItinerary = .hotel
+                        }
+                }
+                .padding(.vertical, 8)
+                .padding(.horizontal, 16)
+                .background(Color.black)
+                .cornerRadius(20)
+                .padding(.horizontal)
+                
                 ScrollView {
-                    VStack(alignment: .leading) {
-                        
-                        // MARK: - Activities
-                        
-                        Text("Activities")
-                            .font(.footnote.bold().smallCaps())
-                            .padding(.top)
-                        
-                        let columns = Array(repeating: GridItem(.flexible(), spacing: 5), count: 10)
-
-                        // ScrollView with horizontal scrolling
-                        ScrollView(.horizontal) {
-                            LazyVGrid(columns: columns, alignment: .center, spacing: 5) {
-                                ForEach(itineraryVM.activities, id: \.self) { activity in
-                                    ActivityRow(activity: activity)
-                                        .shadow(radius: 5)
-                                }
+                    let columns = Array(repeating: GridItem(.flexible(), spacing: 5), count: 2)
+                    
+                    if chosenItinerary == .activity {
+                        LazyVGrid(columns: columns, alignment: .center, spacing: 5) {
+                            ForEach(itineraryVM.activities, id: \.self) { activity in
+                                ActivityRow(activity: activity)
+                                    .shadow(radius: 5)
                             }
                         }
                         .padding(.vertical)
-                        .scrollIndicators(.hidden)
-                        
-                        // MARK: - Flights
-                        
-                        Text("Flights")
-                            .font(.footnote.bold().smallCaps())
-                            .padding(.top)
-                        
-                        ScrollView(.horizontal) {
-                            LazyVGrid(columns: columns, alignment: .center, spacing: 5) {
-                                ForEach(itineraryVM.flights, id: \.self) { flight in
-                                    FlightRow(flight: flight)
-                                        .shadow(radius: 5)
-                                }
+                    } else if chosenItinerary == .flight {
+                        LazyVGrid(columns: columns, alignment: .center, spacing: 5) {
+                            ForEach(itineraryVM.flights, id: \.self) { flight in
+                                FlightRow(flight: flight)
+                                    .shadow(radius: 5)
                             }
                         }
-                        .scrollIndicators(.hidden)
-                                
-                        // MARK: - Hotels
-                        
-                        Text("Stays")
-                            .font(.footnote.bold().smallCaps())
-                            .padding(.top)
-                        
-                        ScrollView(.horizontal) {
-                            LazyVGrid(columns: columns, alignment: .center, spacing: 5) {
-                                ForEach(itineraryVM.hotels, id: \.self) { hotel in
-                                    HotelRow(hotel: hotel)
-                                        .shadow(radius: 5)
-                                }
+                        .padding(.vertical)
+                    } else {
+                        LazyVGrid(columns: columns, alignment: .center, spacing: 5) {
+                            ForEach(itineraryVM.hotels, id: \.self) { hotel in
+                                HotelRow(hotel: hotel)
+                                    .shadow(radius: 5)
                             }
                         }
-                        .scrollIndicators(.hidden)
+                        .padding(.vertical)
                     }
-                    .padding()
                 }
+                .padding(.horizontal)
+                .scrollIndicators(.hidden)
             }
         }
         .navigationBarTitle("")
@@ -111,6 +130,12 @@ struct ItineraryView: View {
     }
 }
 
+enum ChosenItinerary: String, Codable {
+    case activity
+    case flight
+    case hotel
+}
+
 // Custom row views for displaying each section's data
 struct FlightRow: View {
     let flight: FlightOffer
@@ -119,15 +144,16 @@ struct FlightRow: View {
         VStack(alignment: .leading) {
             Text("From \(flight.segments.first?.departureAirport.city ?? "Unknown") to \(flight.segments.first?.arrivalAirport.city ?? "Unknown")")
                 .font(.headline.smallCaps().bold())
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .foregroundColor(.white)
             if let priceDouble = Double(flight.priceBreakdown.total.formattedPrice()) {
                 let roundedPrice = Int(round(priceDouble))
                 let roundedPriceString = String(roundedPrice)
-                Text("Price: \(roundedPriceString)")
+                Text("Price: \(roundedPriceString) CAD")
                     .font(.subheadline.smallCaps().bold())
                     .foregroundColor(.white)
             } else {
-                Text("Price: \(flight.priceBreakdown.total.formattedPrice())")
+                Text("Price: \(flight.priceBreakdown.total.formattedPrice()) CAD")
                     .font(.subheadline.smallCaps().bold())
                     .foregroundColor(.white)
             }
@@ -149,6 +175,7 @@ struct HotelRow: View {
         VStack(alignment: .leading) {
             Text("Hotel: \(hotel.hotel_name)")
                 .font(.headline.smallCaps().bold())
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .foregroundColor(.white)
             let price = hotel.product_price_breakdown.gross_amount_per_night
             let roundedPrice = Int(round(price.value))
@@ -169,22 +196,12 @@ struct ActivityRow: View {
     
     var body: some View {
         Text(activity.name)
-            .font(.caption.smallCaps().bold())
+            .font(.callout.smallCaps().bold())
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
             .foregroundColor(.white)
             .padding(.vertical, 8)
             .padding(.horizontal, 16)
             .background(Color.black)
             .cornerRadius(20)
-    }
-}
-
-struct CarRentalRow: View {
-    let carRental: CarRental
-    var body: some View {
-        VStack(alignment: .leading) {
-            Text("Car Rental: \(carRental.name)")
-            Text("Price: \(carRental.price)")
-        }
-        .padding()
     }
 }

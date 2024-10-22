@@ -41,7 +41,7 @@ class SearchThroughViewModel: ObservableObject {
     let budgetOptions = ["$", "$$", "$$$"]
     
     private var cancellables = Set<AnyCancellable>()
-    private let apiKey = "YOUR_API_KEY"
+    private let apiKey = "AIzaSyD0hr6htOUZr9kUY3PZyfskrGJ0GBNNMJE"
     
     func fetchCityOrCountrySuggestions(for query: String) {
         guard let url = URL(string: "https://maps.googleapis.com/maps/api/place/autocomplete/json?input=\(query)&key=\(apiKey)") else {

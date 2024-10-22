@@ -28,6 +28,6 @@ extension Date {
 // Price formatting for convenience
 extension MinPrice {
     func formattedPrice() -> String {
-        return "\(units).\(nanos / 1000000) \(currencyCode)"
+        return "\(units).\(nanos / 1000000)"
     }
 }
